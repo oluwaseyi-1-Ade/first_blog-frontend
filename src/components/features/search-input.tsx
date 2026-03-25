@@ -13,18 +13,38 @@ export function SearchInput() {
     const [search, setSearch] = React.useState(initialSearch);
     const debouncedSearch = useDebounce(search, 500);
 
+    const lastPushedUrlRef = React.useRef("");
+    // Use a ref for searchParams to ensure the effect can always access 
+    // the current parameters without being triggered by them
+    const searchParamsRef = React.useRef(searchParams);
+    
     React.useEffect(() => {
-        const params = new URLSearchParams(searchParams.toString());
+        searchParamsRef.current = searchParams;
+    }, [searchParams]);
+
+    React.useEffect(() => {
+        const currentParams = searchParamsRef.current;
+        const currentSearch = currentParams.get("q") || "";
+        
+        // Only trigger navigation if the debounced search actually differs from current URL params
+        if (debouncedSearch === currentSearch) return;
+
+        const params = new URLSearchParams(currentParams.toString());
         if (debouncedSearch) {
             params.set("q", debouncedSearch);
         } else {
             params.delete("q");
         }
-        // Reset page when searching
         params.delete("page");
 
-        router.push(`/blog?${params.toString()}`);
-    }, [debouncedSearch, router, searchParams]);
+        const newUrl = `/blog?${params.toString()}`;
+        
+        // Prevent infinite loop by checking if we just pushed this URL
+        if (newUrl === lastPushedUrlRef.current) return;
+        
+        lastPushedUrlRef.current = newUrl;
+        router.push(newUrl);
+    }, [debouncedSearch, router]);
 
     return (
         <div className="relative">

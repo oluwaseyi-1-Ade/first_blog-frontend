@@ -19,16 +19,11 @@ export interface Tag {
 }
 
 export interface BlogPost {
-  id: string;
+  _id: string; // MongoDB use _id
   title: string;
-  slug: string;
-  excerpt: string;
-  content: string; // Markdown content
-  coverImage?: string;
-  author: User;
-  category: Category;
-  tags: Tag[];
-  publishedAt: string; // ISO date string
-  readingTime: number; // in minutes
-  status: 'published' | 'draft';
+  description: string;
+  image?: string;
+  createdAt: string;
+  updatedAt: string;
 }
+

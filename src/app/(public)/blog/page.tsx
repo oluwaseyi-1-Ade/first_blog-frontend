@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { mockPosts, mockCategories } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import { BlogCard } from "@/components/features/blog-card";
 import { SearchInput } from "@/components/features/search-input";
 import { Pagination } from "@/components/ui/pagination";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { FadeIn, CardFadeIn, StaggerChildren } from "@/components/animations/fade-in";
+import { BlogPost } from "@/types";
 
 // Ensure pageProps are correctly typed for Next 15+ or 13+
 interface BlogPageProps {
@@ -17,25 +16,26 @@ export default async function BlogPage(props: BlogPageProps) {
     const searchParams = await props.searchParams;
     const page = Number(searchParams.page) || 1;
     const searchQuery = (searchParams.q as string) || "";
-    const categorySlug = (searchParams.category as string) || "all";
 
     const POSTS_PER_PAGE = 6;
 
-    // Filter posts
-    let filteredPosts = mockPosts.filter((post) => post.status === "published");
+    let allPosts: BlogPost[] = [];
+    try {
+        allPosts = await api.posts.getAll();
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+    }
+
+
+    // Filter posts locally for search
+    let filteredPosts = allPosts;
 
     if (searchQuery) {
         const q = searchQuery.toLowerCase();
         filteredPosts = filteredPosts.filter(
             (post) =>
                 post.title.toLowerCase().includes(q) ||
-                post.excerpt.toLowerCase().includes(q)
-        );
-    }
-
-    if (categorySlug && categorySlug !== "all") {
-        filteredPosts = filteredPosts.filter(
-            (post) => post.category.slug === categorySlug
+                post.description.toLowerCase().includes(q)
         );
     }
 
@@ -44,6 +44,7 @@ export default async function BlogPage(props: BlogPageProps) {
     const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
     const startIndex = (page - 1) * POSTS_PER_PAGE;
     const paginatedPosts = filteredPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
+
 
     return (
         <div className="container px-4 md:px-6 mx-auto py-12 md:py-20 space-y-10">
@@ -56,46 +57,29 @@ export default async function BlogPage(props: BlogPageProps) {
                 </FadeIn>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-6 justify-between items-center bg-muted/20 p-4 rounded-lg">
-                {/* Category Filters */}
-                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                    <Link href="/blog">
-                        <Badge
-                            variant={categorySlug === "all" ? "default" : "outline"}
-                            className="cursor-pointer text-sm px-3 py-1"
-                        >
-                            All
-                        </Badge>
-                    </Link>
-                    {mockCategories.map((cat) => (
-                        <Link key={cat.id} href={`/blog?category=${cat.slug}`}>
-                            <Badge
-                                variant={categorySlug === cat.slug ? "default" : "outline"}
-                                className="cursor-pointer text-sm px-3 py-1"
-                            >
-                                {cat.name}
-                            </Badge>
-                        </Link>
-                    ))}
+            <div className="flex flex-col md:flex-row gap-6 justify-between items-center bg-muted/10 p-4 rounded-2xl border border-border/20 backdrop-blur-sm">
+                <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-sm font-medium text-muted-foreground">{totalPosts} Articles Published</span>
                 </div>
-
-                {/* Search */}
-                <SearchInput />
+                <div className="w-full md:w-auto">
+                    <SearchInput />
+                </div>
             </div>
 
             {filteredPosts.length > 0 ? (
                 <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {paginatedPosts.map((post) => (
-                        <CardFadeIn key={post.id}>
+                        <CardFadeIn key={post._id}>
                             <BlogCard post={post} />
                         </CardFadeIn>
                     ))}
                 </StaggerChildren>
             ) : (
-                <div className="text-center py-20">
-                    <p className="text-muted-foreground text-lg">No posts found matching your criteria.</p>
+                <div className="text-center py-32 bg-muted/5 rounded-3xl border border-dashed border-border/40">
+                    <p className="text-muted-foreground text-xl font-serif italic">No stories found in this chapter.</p>
                     <Link href="/blog">
-                        <Button variant="link" className="mt-2">Clear filters</Button>
+                        <Button variant="link" className="mt-4 text-primary hover:text-primary/80 transition-colors">Begin search again</Button>
                     </Link>
                 </div>
             )}
@@ -107,11 +91,11 @@ export default async function BlogPage(props: BlogPageProps) {
                     totalPages={totalPages}
                     baseUrl="/blog"
                     queryParams={{
-                        ...(searchQuery && { q: searchQuery }),
-                        ...(categorySlug !== "all" && { category: categorySlug })
+                        ...(searchQuery && { q: searchQuery })
                     }}
                 />
             )}
+
         </div>
     );
 }

@@ -18,6 +18,8 @@ export const metadata: Metadata = {
   description: "A space for faith, reflection, and community.",
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,8 +30,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} antialiased bg-background text-foreground`}
       >
+        <Toaster position="top-center" richColors />
         {children}
-        <Script
+
+        {/* <Script
           id="voiceflow-widget"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
@@ -50,7 +54,7 @@ export default function RootLayout({
               })(document, 'script');
             `,
           }}
-        />
+        /> */}
       </body>
     </html>
   );
