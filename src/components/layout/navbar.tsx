@@ -48,14 +48,7 @@ export function Navbar() {
                             <Search className="h-5 w-5" />
                             <span className="sr-only">Search</span>
                         </Button>
-                        <div className="flex items-center gap-2 border-l pl-4 ml-4">
-                            <Link href="/login">
-                                <Button variant="ghost" size="sm">Log in</Button>
-                            </Link>
-                            <Link href="/signup">
-                                <Button size="sm">Sign up</Button>
-                            </Link>
-                        </div>
+
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -91,14 +84,7 @@ export function Navbar() {
                                 {item.name}
                             </Link>
                         ))}
-                        <div className="pt-4 border-t flex flex-col gap-2">
-                            <Link href="/login" onClick={() => setIsOpen(false)}>
-                                <Button variant="outline" className="w-full">Log in</Button>
-                            </Link>
-                            <Link href="/signup" onClick={() => setIsOpen(false)}>
-                                <Button className="w-full">Sign up</Button>
-                            </Link>
-                        </div>
+
                     </div>
                 </div>
             )}

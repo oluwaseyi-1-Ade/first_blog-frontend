@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 const sidebarItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Posts", href: "/admin/posts", icon: FileText },
-    { name: "New Post", href: "/admin/posts/create", icon: PenSquare },
+    // { name: "New Post", href: "/admin/posts/create", icon: PenSquare },
     { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
